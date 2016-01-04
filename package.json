@@ -1,5 +1,5 @@
 {
-  "name": "jsonrpc-client",
+  "name": "tiny-jsonrpc-client",
   "version": "1.0.0",
   "description": "A lightweight JSON-RPC 2.0 client",
   "main": "index.js",
