@@ -37,8 +37,8 @@ module.exports = {
           params: params
         }
       })
-      .then(function(result) {
-        resolve(result)
+      .then(function(response) {
+        resolve(response.result)
       })
       .catch(function(err) {
         var actualError = err.error.error
