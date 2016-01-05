@@ -3,8 +3,10 @@ var Promise = require('bluebird'),
     UUID = require('uuid')
 
 var settings = {
-  url: null
+  url: null,
+  useCookies: false
 }
+var cookieJar = null
 
 function JsonRpcError(message, code, data) {
   this.name = 'JsonRpcError';
@@ -21,7 +23,32 @@ module.exports = {
     settings.url = url
   },
 
-  call: function(method, params) {
+  setUseCookies: function(useCookies) {
+    settings.useCookies = true
+    cookieJar = Request.jar()
+  },
+
+  setCookie: function(cookieString) {
+    if(!cookieJar) {
+      console.warn('setCookie can only be called, if setUseCookies(true) has been called before!')
+      return null
+    }
+    cookieJar.setCookie(cookieString, settings.url)
+  },
+
+  getCookie: function() {
+    if(!cookieJar) {
+      console.warn('getCookie can only be called, if setUseCookies(true) has been called before!')
+      return null
+    }
+    return cookieJar.getCookieString(settings.url)
+  },
+
+  call: function(method, params, useCookies) {
+    if((useCookies || settings.useCookies) && !cookieJar) {
+      cookieJar = Request.jar()
+    }
+
     return new Promise(function(resolve, reject) {
       Request({
         method: 'POST',
@@ -30,12 +57,13 @@ module.exports = {
         headers: {
           'Content-Type': 'application/json'
         },
+        jar: (useCookies || settings.useCookies ? cookieJar : null),
         body: {
           id: UUID.v4(),
           jsonrpc: '2.0',
           method: method,
-          params: params
-        }
+          params: params,
+        },
       })
       .then(function(response) {
         resolve(response.result)
